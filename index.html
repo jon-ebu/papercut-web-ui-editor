@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PaperCut Custom Web UI Editor</title>
+<meta name="description" content="Design a PaperCut end-user web UI theme against faithful page replicas, then export user3.css (or whatever number your PaperCut version uses), header3.inc and footer3.inc.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23177d27'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial, sans-serif' font-weight='700' fill='white' text-anchor='middle'%3EPc%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/editor.css">
+</head>
+<body class="pce">
+
+<header class="pce-toolbar">
+  <div class="pce-toolbar-group pce-toolbar-brand">
+    <span class="pce-toolbar-mark" aria-hidden="true">Pc</span>
+    <h1 class="pce-toolbar-title">PaperCut Custom Web UI Editor</h1>
+  </div>
+
+  <div class="pce-toolbar-divider" aria-hidden="true"></div>
+
+  <div class="pce-toolbar-group pce-toolbar-view">
+    <div class="pce-segmented" role="tablist" aria-label="Preview mode">
+      <button type="button" class="pce-segmented-btn is-active" id="pce-mode-page" role="tab" aria-selected="true">Full replica pages</button>
+      <button type="button" class="pce-segmented-btn" id="pce-mode-gallery" role="tab" aria-selected="false">Component gallery</button>
+    </div>
+    <label class="pce-toolbar-field" for="pce-page-select">
+      <span class="pce-toolbar-field-label">Page Select</span>
+      <select id="pce-page-select" class="pce-select">
+        <option value="recent-print-jobs">Recent Print Jobs</option>
+        <option value="jobs-pending-release">Jobs Pending Release</option>
+        <option value="web-print">Web Print</option>
+        <option value="web-print-step1">Web Print — Step 1: Printer Selection</option>
+        <option value="web-print-step2">Web Print — Step 2: Print Options</option>
+        <option value="web-print-step3">Web Print — Step 3: Upload Documents</option>
+      </select>
+    </label>
+    <button type="button" class="pce-btn pce-btn-ghost" id="pce-inspect-toggle" aria-pressed="false" title="Hover or click elements in the preview to see which control governs them">
+      <span aria-hidden="true">&#8982;</span> Inspect
+    </button>
+  </div>
+
+  <div class="pce-toolbar-spacer"></div>
+
+  <div class="pce-toolbar-group pce-toolbar-actions">
+    <div class="pce-menu" id="pce-export-menu">
+      <button type="button" class="pce-btn pce-btn-primary" id="pce-export-menu-btn" aria-haspopup="true" aria-expanded="false">
+        Export <span aria-hidden="true">&#9662;</span>
+      </button>
+      <div class="pce-menu-panel" id="pce-export-panel" hidden>
+        <p class="pce-section-desc">Files go in <code>[app-path]/server/custom/web/</code> on your PaperCut server, saved as UTF-8.</p>
+        <label class="pce-toolbar-field" for="pce-file-number" style="margin-bottom: 0.75rem;">
+          <span class="pce-toolbar-field-label">File number</span>
+          <input type="number" id="pce-file-number" class="pce-text-input" min="1" max="99" style="width: 4.5rem;">
+        </label>
+        <p class="pce-section-desc" id="pce-file-number-note"></p>
+        <div class="pce-export-grid">
+          <button type="button" class="pce-btn" id="pce-dl-css">Download <span id="pce-dl-css-label">user3.css</span></button>
+          <button type="button" class="pce-btn" id="pce-dl-header" disabled>Download <span id="pce-dl-header-label">header3.inc</span></button>
+          <button type="button" class="pce-btn" id="pce-dl-footer" disabled>Download <span id="pce-dl-footer-label">footer3.inc</span></button>
+        </div>
+        <button type="button" class="pce-btn pce-btn-primary pce-btn-block" id="pce-dl-all">Download all enabled files</button>
+        <hr class="pce-divider">
+        <p class="pce-section-desc">Editor session (not a PaperCut file) — save your in-progress settings or hand them to someone else.</p>
+        <div class="pce-export-grid">
+          <button type="button" class="pce-btn pce-btn-ghost" id="pce-save-json">Save settings as JSON</button>
+          <label class="pce-btn pce-btn-ghost pce-file-btn">
+            Load settings from JSON
+            <input type="file" id="pce-load-json" accept="application/json,.json" hidden>
+          </label>
+        </div>
+      </div>
+    </div>
+    <button type="button" class="pce-btn pce-btn-ghost pce-icon-btn" id="pce-theme-toggle" aria-label="Toggle color theme" data-tooltip="Toggle theme">
+      <span class="pce-theme-icon" aria-hidden="true">◐</span>
+    </button>
+    <div class="pce-toolbar-divider" aria-hidden="true"></div>
+    <button type="button" class="pce-btn pce-btn-danger-outline" id="pce-reset-btn">Reset to defaults</button>
+  </div>
+</header>
+
+<div class="pce-layout" id="pce-layout">
+  <button type="button" class="pce-sidebar-collapse-handle" id="pce-sidebar-toggle" aria-pressed="false" aria-label="Hide the settings sidebar" data-tooltip="Hide sidebar">
+    <span aria-hidden="true" id="pce-sidebar-toggle-icon">&#8249;</span>
+  </button>
+  <aside class="pce-sidebar" id="pce-sidebar">
+
+    <nav class="pce-sidebar-nav" aria-label="Jump to section">
+      <input type="search" id="pce-sidebar-search" class="pce-sidebar-search" placeholder="Search settings…" aria-label="Search settings">
+      <div class="pce-sidebar-nav-btns">
+        <button type="button" class="pce-sidebar-nav-btn" data-jump="colors">Colors</button>
+        <button type="button" class="pce-sidebar-nav-btn" data-jump="typography">Typography</button>
+        <button type="button" class="pce-sidebar-nav-btn" data-jump="sizing">Sizing</button>
+        <button type="button" class="pce-sidebar-nav-btn" data-jump="icons">Icons</button>
+        <button type="button" class="pce-sidebar-nav-btn" data-jump="header">Header</button>
+        <button type="button" class="pce-sidebar-nav-btn" data-jump="footer">Footer</button>
+        <button type="button" class="pce-sidebar-nav-btn" data-jump="advanced">Advanced</button>
+      </div>
+    </nav>
+
+    <section class="pce-section" data-section="colors">
+      <h2 class="pce-section-title">Colors</h2>
+      <div class="pce-controls" id="pce-controls-colors"></div>
+    </section>
+
+    <section class="pce-section" data-section="typography">
+      <h2 class="pce-section-title">Typography</h2>
+      <div class="pce-controls" id="pce-controls-typography"></div>
+    </section>
+
+    <section class="pce-section" data-section="sizing">
+      <h2 class="pce-section-title">Sizing &amp; Layout</h2>
+      <div class="pce-controls" id="pce-controls-sizing"></div>
+    </section>
+
+    <section class="pce-section" data-section="icons">
+      <h2 class="pce-section-title">Icons</h2>
+      <div class="pce-controls" id="pce-controls-icons"></div>
+    </section>
+
+    <section class="pce-section" data-section="header">
+      <h2 class="pce-section-title">Header <span class="pce-section-hint" id="pce-header-filename-hint">header3.inc</span></h2>
+      <label class="pce-switch-row">
+        <span class="pce-switch">
+          <input type="checkbox" id="pce-header-enabled">
+          <span class="pce-switch-track" aria-hidden="true"></span>
+        </span>
+        <span>Use a custom <span id="pce-header-filename-label">header3.inc</span></span>
+      </label>
+      <div class="pce-callout" role="note">
+        <strong>Replaces the entire header region.</strong> This is static HTML, not
+        processed by PaperCut's template engine — the logout button and mobile menu
+        toggle below are pre-filled as a starting point so you don't lose them.
+      </div>
+      <div id="pce-header-editor" class="pce-inc-editor">
+        <textarea id="pce-header-html" class="pce-textarea pce-code" spellcheck="false" rows="12"></textarea>
+      </div>
+    </section>
+
+    <section class="pce-section" data-section="footer">
+      <h2 class="pce-section-title">Footer <span class="pce-section-hint" id="pce-footer-filename-hint">footer3.inc</span></h2>
+      <label class="pce-switch-row">
+        <span class="pce-switch">
+          <input type="checkbox" id="pce-footer-enabled">
+          <span class="pce-switch-track" aria-hidden="true"></span>
+        </span>
+        <span>Use a custom <span id="pce-footer-filename-label">footer3.inc</span></span>
+      </label>
+      <div class="pce-callout" role="note">
+        <strong>Replaces the entire footer region.</strong> Same static-HTML caveat
+        as the header applies here.
+      </div>
+      <div id="pce-footer-editor" class="pce-inc-editor">
+        <textarea id="pce-footer-html" class="pce-textarea pce-code" spellcheck="false" rows="10"></textarea>
+      </div>
+    </section>
+
+    <section class="pce-section" data-section="advanced">
+      <h2 class="pce-section-title">Advanced <span class="pce-section-hint">raw CSS</span></h2>
+      <p class="pce-section-desc">Appended verbatim to the end of the generated <code id="pce-advanced-filename-label">user3.css</code>, after everything above — use this for anything the curated controls don't cover.</p>
+      <textarea id="pce-advanced-css" class="pce-textarea pce-code" spellcheck="false" rows="8" placeholder="/* e.g. #footer { font-size: 0.8rem; } */"></textarea>
+    </section>
+
+  </aside>
+
+  <section class="pce-preview">
+    <div class="pce-frame-wrap">
+      <iframe id="pce-frame" class="pce-frame" title="PaperCut preview"></iframe>
+    </div>
+  </section>
+</div>
+
+<footer class="pce-footer">
+  <p>Not affiliated with PaperCut Software. Reference: <span>papercut.com/help/manuals/ng-mf/common/customize-user-web-pages/</span></p>
+</footer>
+
+<script src="js/schema.js"></script>
+<script src="js/pages.js"></script>
+<script src="js/state.js"></script>
+<script src="js/cssGenerator.js"></script>
+<script src="js/incGenerator.js"></script>
+<script src="js/preview.js"></script>
+<script src="js/inspect.js"></script>
+<script src="js/download.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
