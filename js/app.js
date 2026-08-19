@@ -66,7 +66,8 @@
     if (control.help) {
       const help = document.createElement('span');
       help.className = 'pce-help';
-      help.title = control.help;
+      help.setAttribute('data-help', control.help);
+      help.setAttribute('aria-label', control.help);
       help.textContent = 'i';
       help.tabIndex = 0;
       labelRow.appendChild(help);
