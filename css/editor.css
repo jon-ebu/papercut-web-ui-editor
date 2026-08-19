@@ -249,51 +249,52 @@ code { font-family: var(--pce-mono); }
 }
 .pce-btn-tonal:hover { border-color: var(--pce-accent); }
 
-/* Destructive: outline by default, fills solid only on hover/focus so the
-   resting toolbar doesn't shout, but intent is unambiguous the moment you
-   reach for it. */
-.pce-btn-danger-outline {
+/* Quiet: for an action that must stay reachable but never compete with the
+   toolbar's one true primary (Export) -- Reset to defaults in particular.
+   No border, no color at rest; a destructive tint only shows up once you're
+   actually pointed at it, so it can't get thumbed by accident next to
+   Export, but its intent is still unambiguous the moment you reach for it. */
+.pce-btn-quiet {
   background: transparent;
-  border-color: var(--pce-danger);
-  color: var(--pce-danger);
+  border-color: transparent;
+  color: var(--pce-text-muted);
 }
-.pce-btn-danger-outline:hover,
-.pce-btn-danger-outline:focus-visible {
-  background: var(--pce-danger);
-  border-color: var(--pce-danger);
-  color: var(--pce-accent-contrast);
+.pce-btn-quiet:hover,
+.pce-btn-quiet:focus-visible {
+  background: color-mix(in srgb, var(--pce-danger) 12%, transparent);
+  border-color: transparent;
+  color: var(--pce-danger);
 }
 
 .pce-btn-block { width: 100%; margin-top: 0.6rem; }
 
-/* ---- icon-button tooltips -------------------------------------------------
-   For icon-only controls: aria-label carries the accessible name, this
-   carries the visible affordance every major design tool gives icon
-   buttons on hover/focus. */
-[data-tooltip] { position: relative; }
-[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+/* ---- tooltips --------------------------------------------------------------
+   A single shared layer (see js/tooltip.js), not a per-element ::after --
+   a pseudo-element can only ever be positioned relative to its own trigger,
+   so a trigger near a screen edge (the sidebar collapse handle, a toolbar
+   icon button) had no way to keep its bubble from running off-screen. The
+   shared layer is `position: fixed` and placed in real viewport coordinates
+   on every show/scroll/resize, clamped to stay fully on screen.
+   For icon-only controls: aria-label carries the accessible name, data-
+   tooltip/data-help carries the visible affordance on hover/focus. */
+.pce-tooltip-layer {
+  position: fixed;
+  max-width: 240px;
   background: var(--pce-text);
   color: var(--pce-bg);
   font-family: var(--pce-sans);
   font-size: 0.72rem;
   font-weight: 600;
-  white-space: nowrap;
-  padding: 0.3rem 0.55rem;
+  line-height: 1.4;
+  padding: 0.35rem 0.6rem;
   border-radius: 5px;
+  box-shadow: var(--pce-shadow);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.1s ease;
-  z-index: 50;
+  z-index: 1000;
 }
-[data-tooltip]:hover::after,
-[data-tooltip]:focus-visible::after {
-  opacity: 1;
-}
+.pce-tooltip-layer.is-visible { opacity: 1; }
 
 .pce-file-btn {
   display: inline-flex;
@@ -557,7 +558,6 @@ code { font-family: var(--pce-mono); }
 }
 
 .pce-help {
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -569,36 +569,6 @@ code { font-family: var(--pce-mono); }
   font-size: 0.62rem;
   font-family: var(--pce-mono);
   cursor: help;
-}
-/* Explanatory help text runs to full sentences, so unlike the short
-   [data-tooltip] labels above, this wraps in a fixed-width bubble instead of
-   a single nowrap line -- and hangs from the icon's right edge rather than
-   centering, so it can't spill past the sidebar's clipped right edge. */
-.pce-help::after {
-  content: attr(data-help);
-  position: absolute;
-  top: calc(100% + 6px);
-  right: -6px;
-  width: 220px;
-  white-space: normal;
-  line-height: 1.4;
-  background: var(--pce-text);
-  color: var(--pce-bg);
-  font-family: var(--pce-sans);
-  font-size: 0.72rem;
-  font-weight: 500;
-  text-align: left;
-  padding: 0.45rem 0.6rem;
-  border-radius: 5px;
-  box-shadow: var(--pce-shadow);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.1s ease;
-  z-index: 50;
-}
-.pce-help:hover::after,
-.pce-help:focus-visible::after {
-  opacity: 1;
 }
 
 .pce-color-field {
